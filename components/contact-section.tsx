@@ -1,20 +1,7 @@
-"use client"
-
-import { useState, useEffect } from "react"
 import { PhoneIcon, MapPinIcon, MailIcon } from "lucide-react"
-import { getAdminSettings } from "@/lib/admin-settings"
 
 export function ContactSection() {
-  const [adminPhone, setAdminPhone] = useState("")
-
-  useEffect(() => {
-    async function loadSettings() {
-      const settings = await getAdminSettings()
-      setAdminPhone(settings.adminPhone)
-    }
-
-    loadSettings()
-  }, [])
+  const adminPhone = process.env.NEXT_PUBLIC_ADMIN_PHONE || "+2348026705191"
 
   return (
     <section id="contact" className="py-16 bg-gray-50">
@@ -35,7 +22,7 @@ export function ContactSection() {
               </div>
               <div className="ml-4">
                 <h3 className="text-lg font-medium text-gray-900">Phone</h3>
-                <p className="mt-1 text-gray-600">{adminPhone || "+2348026705191"}</p>
+                <p className="mt-1 text-gray-600">{adminPhone}</p>
               </div>
             </div>
 

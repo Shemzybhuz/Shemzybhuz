@@ -1,111 +1,264 @@
-# Blessing Signature Salon
+"use client"
 
-A professional salon booking website for Blessing Signature Salon, located in Oyo State, Nigeria.
+import type React from "react"
+import { useState } from "react"
+import { createBooking } from "@/lib/booking-client"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { CheckCircle, AlertCircle, Loader2 } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
+import { Textarea } from "@/components/ui/textarea"
 
-## Features
+const services = [
+  "Hair Treatment",
+  "Hair Styling",
+  "Nail Care",
+  "Facial",
+  "Body Treatment",
+  "Massage",
+]
 
-- Modern, responsive design
-- Online booking system with client SMS confirmations
-- Service showcase
-- Admin dashboard for booking management
-- Email and SMS notifications for both clients and admin
-- Google Maps integration
+export default function BookingForm() {
+  const { toast } = useToast()
+  const [isLoading, setIsLoading] = useState(false)
+  const [successMessage, setSuccessMessage] = useState("")
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    service: "",
+    date: "",
+    time: "",
+    notes: "",
+    preferredContact: "sms",
+  })
 
-## Setup Instructions
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+  }
 
-### 1. Environment Variables
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    setSuccessMessage("")
 
-Create a `.env.local` file with the following variables:
+    // Validate form data
+    if (!formData.name || !formData.phone || !formData.service || !formData.date || !formData.time) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      })
+      setIsLoading(false)
+      return
+    }
 
-\`\`\`
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+    try {
+      console.log("[v0] Submitting booking with data:", formData)
+      
+      const result = await createBooking(formData)
 
-# Email notifications (Gmail)
-GMAIL_USER=your_gmail_account
-GMAIL_PASSWORD=your_gmail_app_password
+      if (result.success) {
+        setSuccessMessage(
+          `Booking confirmed! A ${formData.preferredContact === "sms" ? "SMS" : "WhatsApp"} confirmation has been sent to ${formData.phone}.`
+        )
+        
+        // Reset form
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          service: "",
+          date: "",
+          time: "",
+          notes: "",
+          preferredContact: "sms",
+        })
 
-# SMS notifications (Twilio)
-TWILIO_ACCOUNT_SID=your_twilio_account_sid
-TWILIO_AUTH_TOKEN=your_twilio_auth_token
-TWILIO_PHONE_NUMBER=your_twilio_phone_number
+        toast({
+          title: "Booking Confirmed",
+          description: `Your appointment is scheduled for ${formData.date} at ${formData.time}`,
+        })
 
-# Admin contact info
-ADMIN_EMAIL=admin_email@example.com
-ADMIN_PHONE=+2348026705191
-NEXT_PUBLIC_ADMIN_EMAIL=admin_email@example.com
-NEXT_PUBLIC_ADMIN_PHONE=+2348026705191
-\`\`\`
+        // Clear success message after 5 seconds
+        setTimeout(() => setSuccessMessage(""), 5000)
+      } else {
+        toast({
+          title: "Booking Failed",
+          description: result.message || "Failed to create booking",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      console.error("[v0] Error submitting booking:", error)
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
-### 2. Database Setup
+  return (
+    <div className="w-full max-w-2xl mx-auto">
+      <Card>
+        <CardHeader>
+          <CardTitle>Book Your Appointment</CardTitle>
+          <CardDescription>
+            Schedule your visit at Blessing Signature Salon
+          </CardDescription>
+        </CardHeader>
 
-Run the SQL migrations in the `/migrations` folder in your Supabase SQL editor to set up the necessary tables.
+        <form onSubmit={handleSubmit}>
+          <CardContent className="space-y-6">
+            {successMessage && (
+              <Alert className="border-green-200 bg-green-50">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                <AlertDescription className="text-green-800">
+                  {successMessage}
+                </AlertDescription>
+              </Alert>
+            )}
 
-### 3. Supabase Edge Functions
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name *</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Your name"
+                  required
+                />
+              </div>
 
-The project uses Supabase Edge Functions for email and SMS notifications. Deploy these functions using the Supabase CLI:
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="your@email.com"
+                />
+              </div>
+            </div>
 
-\`\`\`
-cd supabase/functions
-supabase functions deploy
-\`\`\`
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number * (e.g., +234...)</Label>
+              <Input
+                id="phone"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                placeholder="+2348026705191"
+                required
+              />
+              <p className="text-sm text-muted-foreground">
+                We'll send your booking confirmation to this number.
+              </p>
+            </div>
 
-### 4. Update Admin Information
+            <div className="space-y-2">
+              <Label htmlFor="service">Service * </Label>
+              <select
+                id="service"
+                name="service"
+                value={formData.service}
+                onChange={(e) => setFormData({ ...formData, service: e.target.value })}
+                className="w-full px-3 py-2 border border-input rounded-md"
+                required
+              >
+                <option value="">Select a service</option>
+                {services.map((service) => (
+                  <option key={service} value={service}>
+                    {service}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-After setting up the project, you can update your admin phone number and email:
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="date">Preferred Date *</Label>
+                <Input
+                  id="date"
+                  name="date"
+                  type="date"
+                  value={formData.date}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
-1. Log in to the admin dashboard
-2. Go to Settings
-3. Update your phone number and email address
-4. Save changes
+              <div className="space-y-2">
+                <Label htmlFor="time">Preferred Time *</Label>
+                <Input
+                  id="time"
+                  name="time"
+                  type="time"
+                  value={formData.time}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
 
-## Development
+            <div className="space-y-2">
+              <Label htmlFor="notes">Additional Notes</Label>
+              <Textarea
+                id="notes"
+                name="notes"
+                value={formData.notes}
+                onChange={handleChange}
+                placeholder="Any special requests or information..."
+                className="h-20"
+              />
+            </div>
 
-\`\`\`
-npm install
-npm run dev
-\`\`\`
+            <div className="space-y-3">
+              <Label>Preferred Contact Method</Label>
+              <RadioGroup value={formData.preferredContact} onValueChange={(value) => setFormData({ ...formData, preferredContact: value })}>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="sms" id="sms" />
+                  <Label htmlFor="sms" className="font-normal cursor-pointer">
+                    SMS
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="whatsapp" id="whatsapp" />
+                  <Label htmlFor="whatsapp" className="font-normal cursor-pointer">
+                    WhatsApp
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+          </CardContent>
 
-## Production Build
-
-\`\`\`
-npm run build
-npm start
-\`\`\`
-
-## Notification System
-
-The booking system sends notifications to both the salon admin and the client:
-
-1. **Admin Notifications:**
-   - Email notification with booking details
-   - SMS notification with booking details
-
-2. **Client Notifications:**
-   - SMS confirmation with appointment details
-   - The client's phone number (entered in the booking form) is used to send the confirmation
-
-## Updating Admin Settings
-
-You can update your admin contact information in two ways:
-
-1. **Through the Admin Dashboard:**
-   - Navigate to `/admin/settings`
-   - Update your phone number and email
-   - Save changes
-
-2. **Through Environment Variables:**
-   - Update `ADMIN_PHONE` and `ADMIN_EMAIL` in your `.env.local` file
-   - Restart the application
-
-## Troubleshooting
-
-If you encounter issues with notifications:
-
-1. Ensure all environment variables are correctly set
-2. Check that Supabase Edge Functions are properly deployed
-3. Verify your Gmail and Twilio credentials
-4. Check the phone number format (must include country code, e.g., +2348026705191)
-5. Make sure the client's phone number is entered correctly in the booking form
+          <CardFooter>
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full"
+            >
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isLoading ? "Processing..." : "Confirm Booking"}
+            </Button>
+          </CardFooter>
+        </form>
+      </Card>
+    </div>
+  )
+}

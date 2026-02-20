@@ -1,111 +1,209 @@
 # Blessing Signature Salon
 
-A professional salon booking website for Blessing Signature Salon, located in Oyo State, Nigeria.
+A professional, fully responsive salon booking website for Blessing Signature Salon, located in Oyo State, Nigeria. Built with Next.js, featuring a modern booking system with SMS client notifications and a clean user interface.
 
 ## Features
 
-- Modern, responsive design
-- Online booking system with client SMS confirmations
-- Service showcase
-- Admin dashboard for booking management
-- Email and SMS notifications for both clients and admin
-- Google Maps integration
+- ✅ Modern, fully responsive design (mobile, tablet, desktop)
+- ✅ Professional online booking system
+- ✅ Real-time client phone number notifications
+- ✅ Service showcase with pricing in Nigerian Naira (₦)
+- ✅ Testimonials section
+- ✅ Gallery showcase
+- ✅ Google Maps integration for location
+- ✅ WhatsApp and contact widgets
+- ✅ About Us and Contact pages
+- ✅ Clean, maintainable codebase
 
-## Setup Instructions
+## Getting Started
 
-### 1. Environment Variables
+### Prerequisites
 
-Create a `.env.local` file with the following variables:
+- Node.js 16.x or higher
+- npm or yarn
 
-\`\`\`
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+### Installation
 
-# Email notifications (Gmail)
-GMAIL_USER=your_gmail_account
-GMAIL_PASSWORD=your_gmail_app_password
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd blessing-signature-salon
+```
 
-# SMS notifications (Twilio)
-TWILIO_ACCOUNT_SID=your_twilio_account_sid
-TWILIO_AUTH_TOKEN=your_twilio_auth_token
-TWILIO_PHONE_NUMBER=your_twilio_phone_number
-
-# Admin contact info
-ADMIN_EMAIL=admin_email@example.com
-ADMIN_PHONE=+2348026705191
-NEXT_PUBLIC_ADMIN_EMAIL=admin_email@example.com
-NEXT_PUBLIC_ADMIN_PHONE=+2348026705191
-\`\`\`
-
-### 2. Database Setup
-
-Run the SQL migrations in the `/migrations` folder in your Supabase SQL editor to set up the necessary tables.
-
-### 3. Supabase Edge Functions
-
-The project uses Supabase Edge Functions for email and SMS notifications. Deploy these functions using the Supabase CLI:
-
-\`\`\`
-cd supabase/functions
-supabase functions deploy
-\`\`\`
-
-### 4. Update Admin Information
-
-After setting up the project, you can update your admin phone number and email:
-
-1. Log in to the admin dashboard
-2. Go to Settings
-3. Update your phone number and email address
-4. Save changes
-
-## Development
-
-\`\`\`
+2. Install dependencies:
+```bash
 npm install
+```
+
+3. Set up environment variables:
+
+Create a `.env.local` file with:
+```
+NEXT_PUBLIC_ADMIN_PHONE=+2348026705191
+NEXT_PUBLIC_ADMIN_EMAIL=admin@blessingsignature.com
+```
+
+4. Run the development server:
+```bash
 npm run dev
-\`\`\`
+```
 
-## Production Build
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-\`\`\`
-npm run build
-npm start
-\`\`\`
+## Project Structure
 
-## Notification System
+```
+/app
+  /api
+    /bookings - Booking submission API
+  /admin - Admin dashboard (future enhancement)
+  layout.tsx - Root layout
+  page.tsx - Home page
+  /services - Services page
+  /booking - Booking page
+  /gallery - Gallery page
+  /contact - Contact page
+  /about - About page
 
-The booking system sends notifications to both the salon admin and the client:
+/components
+  booking-form.tsx - Main booking form
+  contact-section.tsx - Contact information
+  - UI components in /components/ui
 
-1. **Admin Notifications:**
-   - Email notification with booking details
-   - SMS notification with booking details
+/lib
+  booking-client.ts - Client booking utilities
+  booking-service.ts - Server-side booking logic
+  notification.ts - Notification utilities
 
-2. **Client Notifications:**
-   - SMS confirmation with appointment details
-   - The client's phone number (entered in the booking form) is used to send the confirmation
+/public
+  - Static assets (images, favicon)
 
-## Updating Admin Settings
+/supabase
+  - Database functions (future)
+```
 
-You can update your admin contact information in two ways:
+## Booking System
 
-1. **Through the Admin Dashboard:**
-   - Navigate to `/admin/settings`
-   - Update your phone number and email
-   - Save changes
+The booking form collects:
+- **Client Name** (required)
+- **Client Email** (optional)
+- **Client Phone** (required) - Used for SMS confirmation
+- **Service** (required)
+- **Date** (required)
+- **Time** (required)
+- **Notes** (optional)
+- **Preferred Contact Method** (SMS or WhatsApp)
 
-2. **Through Environment Variables:**
-   - Update `ADMIN_PHONE` and `ADMIN_EMAIL` in your `.env.local` file
-   - Restart the application
+### How It Works
+
+1. Customer submits booking form with their phone number
+2. Form validates required fields
+3. Booking is sent to `/api/bookings` endpoint
+4. System logs the booking (future: saves to database)
+5. SMS confirmation sent to client's phone number
+
+## Customization
+
+### Update Contact Information
+
+Edit environment variables in Vercel dashboard:
+- `NEXT_PUBLIC_ADMIN_PHONE` - Your salon's phone number
+- `NEXT_PUBLIC_ADMIN_EMAIL` - Your salon's email
+
+### Update Services and Pricing
+
+Edit services list in `/components/booking-form.tsx`:
+```typescript
+const services = [
+  "Hair Treatment",
+  "Hair Styling",
+  "Nail Care",
+  // Add more services
+]
+```
+
+### Update Salon Information
+
+Update brand name and details throughout:
+- `/app/layout.tsx` - Page titles and metadata
+- `/components/layout/header.tsx` - Header content
+- `/components/layout/footer.tsx` - Footer content
+- Various page components
+
+## Performance Optimizations
+
+- Server-side rendering where possible
+- Image optimization
+- Component code splitting
+- Responsive design for all devices
+- Mobile-first approach
+
+## Browser Support
+
+- Chrome (latest)
+- Firefox (latest)
+- Safari (latest)
+- Edge (latest)
+- Mobile browsers (iOS Safari, Chrome Android)
+
+## Deployment
+
+### Deploy to Vercel
+
+1. Push code to GitHub
+2. Connect repository to Vercel
+3. Add environment variables in Vercel dashboard:
+   - `NEXT_PUBLIC_ADMIN_PHONE`
+   - `NEXT_PUBLIC_ADMIN_EMAIL`
+4. Deploy
+
+### Deploy to Other Platforms
+
+The application can be deployed to any platform supporting Node.js:
+- Netlify
+- Firebase Hosting
+- AWS Amplify
+- DigitalOcean
+- Railway
+
+## Future Enhancements
+
+- Database integration (Supabase/MongoDB)
+- Admin dashboard for booking management
+- Email confirmations
+- Booking cancellation/rescheduling
+- Staff profiles and scheduling
+- Payment integration
+- Customer reviews system
+- Appointment reminders
 
 ## Troubleshooting
 
-If you encounter issues with notifications:
+### Booking form not submitting
 
-1. Ensure all environment variables are correctly set
-2. Check that Supabase Edge Functions are properly deployed
-3. Verify your Gmail and Twilio credentials
-4. Check the phone number format (must include country code, e.g., +2348026705191)
-5. Make sure the client's phone number is entered correctly in the booking form
+1. Check browser console for errors (F12)
+2. Verify environment variables are set correctly
+3. Ensure API route `/api/bookings` is working
+
+### Styling issues
+
+1. Check that Tailwind CSS is properly configured
+2. Clear browser cache (Ctrl+Shift+Delete)
+3. Restart development server
+
+### Phone number format
+
+- Always include country code (e.g., +234...)
+- Format example: +2348026705191
+
+## Support
+
+For issues or questions, check:
+1. Browser console for error messages
+2. Network tab in DevTools
+3. Environment variables configuration
+4. File paths and imports
+
+## License
+
+This project is proprietary to Blessing Signature Salon.
